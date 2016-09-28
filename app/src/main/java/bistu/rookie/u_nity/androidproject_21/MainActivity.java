@@ -14,43 +14,41 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG="MyWordsTag";
+    private Button[] buttons;
     private ContentResolver resolver;
+    private static final String TAG = "MyTag";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        resolver = this.getContentResolver();
+        int[] ints = {R.id.btn_getAll, R.id.btn_insert, R.id.btn_delete, R.id.btn_deleteAll
+                , R.id.btn_update, R.id.btn_query};
+        buttons = new Button[6];
 
-        Button buttonAll=(Button)findViewById(R.id.buttonAll);
-        Button buttonInsert=(Button)findViewById(R.id.buttonInsert);
-        Button buttonDelete=(Button)findViewById(R.id.buttonDelete);
-        Button buttonDeleteAll=(Button)findViewById(R.id.buttonDeleteAll);
-        Button buttonUpdate=(Button)findViewById(R.id.buttonUpdate);
-        Button buttonQuery=(Button)findViewById(R.id.buttonQuery);
+        resolver = getContentResolver();
 
-        buttonAll.setOnClickListener(new View.OnClickListener() {
+        for (int i=0; i<ints.length; i++){
+            buttons[i] = (Button)findViewById(ints[i]);
+        }
+
+        buttons[0].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Cursor cursor = resolver.query(Words.Word.CONTENT_URI,
-                        new String[] { Words.Word._ID, Words.Word.COLUMN_NAME_WORD, Words.Word.COLUMN_NAME_MEANING,Words.Word.COLUMN_NAME_SAMPLE},
+                        new String[] { Words.Word._ID, Words.Word.COLUMN_NAME_WORD,Words.Word.COLUMN_NAME_MEANING,Words.Word.COLUMN_NAME_SAMPLE},
                         null, null, null);
                 if (cursor == null){
-                    Toast.makeText(MainActivity.this,"没有找到记录", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this,"Not Find",Toast.LENGTH_LONG).show();
                     return;
                 }
-
-//找到记录，这里简单起见，使用Log输出
 
                 String msg = "";
                 if (cursor.moveToFirst()){
                     do{
-                        msg += "ID:" + cursor.getInt(cursor.getColumnIndex(Words.Word._ID)) + ",";
-                        msg += "单词：" + cursor.getString(cursor.getColumnIndex(Words.Word.COLUMN_NAME_WORD))+ ",";
-                        msg += "含义：" + cursor.getInt(cursor.getColumnIndex(Words.Word.COLUMN_NAME_MEANING)) + ",";
-                        msg += "示例" + cursor.getFloat(cursor.getColumnIndex(Words.Word.COLUMN_NAME_SAMPLE)) + "\n";
+                        msg += "ID:" + cursor.getInt(cursor.getColumnIndex(Words.Word._ID)) + ", ";
+                        msg += "Word：" + cursor.getString(cursor.getColumnIndex(Words.Word.COLUMN_NAME_WORD)) + "\n";
                     }while(cursor.moveToNext());
                 }
 
@@ -58,45 +56,46 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        buttonInsert.setOnClickListener(new View.OnClickListener() {
+        buttons[1].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String strWord="Banana";
-                String strMeaning="香蕉";
-                String strSample="吃香蕉";
+                String strWord="Orange";
+                String strMeaning="orange";
+                String strSample="This orange is very nice.";
                 ContentValues values = new ContentValues();
 
                 values.put(Words.Word.COLUMN_NAME_WORD, strWord);
                 values.put(Words.Word.COLUMN_NAME_MEANING, strMeaning);
                 values.put(Words.Word.COLUMN_NAME_SAMPLE, strSample);
 
-                Uri newUri = resolver.insert(Words.Word.CONTENT_URI, values);
+
+                resolver.insert(Words.Word.CONTENT_URI, values);
             }
         });
 
-        buttonDelete.setOnClickListener(new View.OnClickListener() {
+        buttons[2].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String id="3";//简单起见，这里指定ID，用户可在程序中设置id的实际值
+                String id="6";
                 Uri uri = Uri.parse(Words.Word.CONTENT_URI_STRING + "/" + id);
-                int result = resolver.delete(uri, null, null);
+                resolver.delete(uri, null, null);
             }
         });
 
-        buttonDeleteAll.setOnClickListener(new View.OnClickListener() {
+        buttons[3].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 resolver.delete(Words.Word.CONTENT_URI, null, null);
             }
         });
 
-        buttonUpdate.setOnClickListener(new View.OnClickListener() {
+        buttons[4].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String id="3";
-                String strWord="Banana";
-                String strMeaning="banana";
-                String strSample="This banana is very nice.";
+                String id="1";
+                String strWord="Orange";
+                String strMeaning="orange";
+                String strSample="This orange is very nice.";
                 ContentValues values = new ContentValues();
 
                 values.put(Words.Word.COLUMN_NAME_WORD, strWord);
@@ -104,32 +103,29 @@ public class MainActivity extends AppCompatActivity {
                 values.put(Words.Word.COLUMN_NAME_SAMPLE, strSample);
 
                 Uri uri = Uri.parse(Words.Word.CONTENT_URI_STRING + "/" + id);
-                int result = resolver.update(uri, values, null, null);
+                resolver.update(uri, values, null, null);
+
             }
         });
 
-        buttonQuery.setOnClickListener(new View.OnClickListener() {
+        buttons[5].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String id="3";
+                String id="1";
                 Uri uri = Uri.parse(Words.Word.CONTENT_URI_STRING + "/" + id);
-                Cursor cursor = resolver.query(Words.Word.CONTENT_URI,
+                Cursor cursor = resolver.query(uri,
                         new String[] { Words.Word._ID, Words.Word.COLUMN_NAME_WORD, Words.Word.COLUMN_NAME_MEANING,Words.Word.COLUMN_NAME_SAMPLE},
                         null, null, null);
                 if (cursor == null){
-                    Toast.makeText(MainActivity.this,"没有找到记录",Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this,"Not Find",Toast.LENGTH_LONG).show();
                     return;
                 }
-
-//找到记录，这里简单起见，使用Log输出
 
                 String msg = "";
                 if (cursor.moveToFirst()){
                     do{
-                        msg += "ID:" + cursor.getInt(cursor.getColumnIndex(Words.Word._ID)) + ",";
-                        msg += "单词：" + cursor.getString(cursor.getColumnIndex(Words.Word.COLUMN_NAME_WORD))+ ",";
-                        msg += "含义：" + cursor.getInt(cursor.getColumnIndex(Words.Word.COLUMN_NAME_MEANING)) + ",";
-                        msg += "示例" + cursor.getFloat(cursor.getColumnIndex(Words.Word.COLUMN_NAME_SAMPLE)) + "\n";
+                        msg += "ID:" + cursor.getInt(cursor.getColumnIndex(Words.Word._ID)) + ", ";
+                        msg += "Word：" + cursor.getString(cursor.getColumnIndex(Words.Word.COLUMN_NAME_WORD))+ "\n";
                     }while(cursor.moveToNext());
                 }
 
@@ -138,7 +134,5 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
     }
-
 }
